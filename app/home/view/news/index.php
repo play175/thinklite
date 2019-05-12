@@ -19,20 +19,26 @@
 <div class="page">
     <div class="container">
         <div class="page__inner">
-            <div class="page__menu">
+            <!-- <div class="page__menu">
                 <ul class="vMenu">
                     <li><a href="#" class="vMenu--active">Active page</a></li>
-                    <?php foreach($result['data'] as $k=>&$v){ ?>
-                        <li>
-                            <a href="<?php echo U('news/detail',['id'=>$v['id']])?>" ><?php echo $v["title"];?></a>
-                        </li>   
-                    <?php } ?>
+                    <li><a href="#" >page1</a></li>
+                    <li><a href="#" >page2</a></li>
                 </ul>
-            </div>
+            </div> -->
             <div class="page__main">
                 <div class="text-container">
-                    <h3 class="page__main__title">This is the main area</h3>
-                    <p>Write or do whatever you want here!</p>
+                    <ul class="news">
+                        <?php foreach ($result['data'] as $k => &$v) {?>
+                            <li>
+                                <a href="<?php echo U('news/detail', ['id' => $v['id']]) ?>" ><h4><?php echo $v["title"]; ?></h4></a>
+                                <p><?php echo $v["summary"]; ?>... 
+                                <br />
+                                <a href="<?php echo U('news/detail', ['id' => $v['id']]) ?>" >查看详情 &raquo;</a></p>
+                            </li>
+                        <?php }?>
+                    </ul>
+                    <?php echo $result['pager']; ?>
                 </div>
             </div>
         </div>

@@ -6,7 +6,8 @@ class News extends Base
 {
     public function index()
     {
-        $result = $this->db->findAndPage('SELECT id,title FROM __NEWS__ ORDER BY id DESC');
+        //findAndPage会读取参数page，并分页输出
+        $result = $this->db->findAndPage('SELECT id,title,summary FROM __NEWS__ ORDER BY id DESC');
         $this->assign('result', $result);
     }
 

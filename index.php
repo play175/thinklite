@@ -1,9 +1,14 @@
 <?php
 
-/*******************************/
+/**
+ * thinklite
+ * @desc 极致简约的PHP开发框架
+ * @author play175
+ * @repo https://github.com/play175/thinklite
+ */
 
 define('CFG_DEBUG', 1); //是否打开调试模式
-define('CFG_DATABASE', 'mysql://root:@127.0.0.1:3306/hx186?prefix=yy_&charset=utf8'); //数据库链接，prefix是表名前缀
+define('CFG_DATABASE', 'mysql://root:@127.0.0.1:3306/thinklite?prefix=yy_&charset=utf8'); //数据库链接，prefix是表名前缀
 define('CFG_DEBUG_SQL', 1); //是否打开SQL调试选项
 define('CFG_URL_MODE', 2); //URL模式，0:普通 1:pathinfo+get 2:pathinfo
 define('CFG_APP_DIR', __DIR__ . '/app');
@@ -16,7 +21,9 @@ define('CFG_AUTOLOAD_DIR', __DIR__);
 
 define('IS_AJAX', (!empty($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], '/json') !== false));
 
-//模拟三元操作符
+/**
+ * 模拟三元操作符,用法如：$ret = iif($a,$b) //类似js的 let ret = a ? a : b 或者 let ret = a || b
+ */
 function iif(&$a, &$b)
 {
     if (empty($a)) {
@@ -26,7 +33,24 @@ function iif(&$a, &$b)
     return $a;
 }
 
-//获取多个/单个输入参数
+/**
+ * 获取单个/多个输入参数
+ * @param $name 单个参数名称或者多个参数名称组成的数组
+ * @param $default 对应参数的默认值或者多个默认值组成的数组
+ * @param $maxLength 最大长度，仅针对单个字符串
+ * 
+ * 示例:
+ * $v = $('id') //等价于：$_REQUEST['id']
+ * $v = $('get.id') //等价于：$_GET['id']
+ * $v = $('post.id')//等价于：$_POST['id']
+ * $v = $('cookie.name') //获取cookie值
+ * $v = $('id/d') //会把参数id格式化为数字类型，且如果传参不满足，会返回错误提示
+ * $v = $('ratio/float') //会把参数ratio格式化为数字类型，且如果传参不满足，会返回错误提示
+ * $v = $('name/4+') //参数name长度不能少于4个字符，否则会返回错误提示
+ * $v = $('len/d/1+') //数字类型参数len不能小于1，否则会返回错误提示
+ * $v = $('name/4') //参数name长度必须为4个字符，否则会返回错误提示
+ * $v = $('name/2+/姓名') //参数name长度不能少于2个字符，否则会返回错误提示,错误提示可能是：“姓名不能少于2个字符”
+ */
 function I($name, $default = null, $maxLength = 0)
 {
     if (is_array($name)) {
@@ -60,7 +84,9 @@ function I($name, $default = null, $maxLength = 0)
     }
 }
 
-//获取单个输入参数
+/**
+ * 获取单个输入参数，被函数I调用，也可以单独使用
+ */
 function II($name, $default = null, $maxLength = 0)
 {
     preg_match("/(?:(get|post|request|cookie)\.)?([a-zA-Z0-9_-]+)(?:\/(double|float|d|int|string|date|datetime))?(?:\/([0-9\.-]+))?(?:\/(.+))?/i", $name, $matches);
@@ -195,7 +221,9 @@ function II($name, $default = null, $maxLength = 0)
     return [$key, $default, null];
 }
 
-//utf8分割字符串
+/**
+ * 分割utf8字符串
+ */
 function mbsubstr($str, $start, $len)
 {
     $strlen = $start + $len;
@@ -210,7 +238,17 @@ function mbsubstr($str, $start, $len)
     return $tmpstr;
 }
 
-//路由生成函数
+/**
+ * 路由链接生成函数
+ * @param $uri 路由路径，如需要生成前往news控制器下的detail的action的URL，则:news/detail
+ * @param $params 参数数组
+ * @param $mode URL模式，0:普通 1:pathinfo+get 2:pathinfo，如果不传此参数，则读取全局配置CFG_URL_MODE
+ * @return 格式化后的URL
+ * 示例：U('news/detail',['id'=>1])
+ *   当 $mode = 0 时，则生成：/?c=news&a=detail&id=1
+ *   当 $mode = 1 时，则生成：/news/detail.html?id=1
+ *   当 $mode = 2 时，则生成：/news/detail/id/1.html
+ */
 function U($uri, $params = [], $mode = null)
 {
     if ($mode === null) {
@@ -284,7 +322,9 @@ function U($uri, $params = [], $mode = null)
     return '/?' . http_build_query($params);
 }
 
-//解析路由函数
+/**
+ * 路由链接解析函数，一般不需要关注，仅thinklite内部使用
+ */
 function parseUri($uri, $flat = false)
 {
     $pathsLen = 0;
@@ -387,7 +427,14 @@ function parseUri($uri, $flat = false)
     ];
 }
 
-//cookie读写函数
+/**
+ * cookie读写函数
+ * @param $key cookie名称
+ * @param $value 要设置的值，传null时，则cookie会被删除
+ * @param $expire
+ * @param $path
+ * @param $domain
+ */
 function cookie($key, $value = '', $expire = null, $path = '/', $domain = null)
 {
     if ('' === $value) {
@@ -396,7 +443,9 @@ function cookie($key, $value = '', $expire = null, $path = '/', $domain = null)
     setcookie($key, $value, $expire, $path, $domain);
 }
 
-//抛出致命异常
+/**
+ * 抛出致命异常，致命异常只有CFG_DEBUG定义为1时才会抛出异常详情
+ */
 function fatal($msg, $code = -1)
 {
     if (defined('CFG_DEBUG') && CFG_DEBUG) {
@@ -407,7 +456,9 @@ function fatal($msg, $code = -1)
     exit;
 }
 
-//抛出普通异常
+/**
+ * 抛出普通异常
+ */
 function err($msg, $code = -1)
 {
     global $self;
@@ -421,18 +472,22 @@ function err($msg, $code = -1)
             exit(json_encode($output, JSON_UNESCAPED_UNICODE));
         } else {
             header("Content-type: text/html; charset=utf-8");
-            exit('<pre>错误码：' . $code . '<br />错误信息：<br />' . $msg . '</pre><a href="javascript:history.length>1?history.go(-1):window.close();">返回上一页</a><br /><a href="/">返回首页</a>');
+            exit('<pre>错误码：' . $code . '<br />错误信息：' . $msg . '</pre><a href="javascript:history.length>1?history.go(-1):window.close();">返回上一页</a><br /><a href="/">返回首页</a>');
         }
     }
 }
 
-//获取当前控制器的视图文件路径
+/**
+ * 获取当前控制器的视图文件路径
+ */
 function getViewFile($view)
 {
     return CFG_APP_DIR . '/' . MODULE . '/' . VIEW . '/' . $view . '.php';
 }
 
-//导入其他模板
+/**
+ * 导入其他模板
+ */
 function import($_view, $_view_params = null)
 {
     global $self;
@@ -441,6 +496,9 @@ function import($_view, $_view_params = null)
     include getViewFile($_view);
 }
 
+/**
+ * 自定义异常捕获
+ */
 function customError($errno, $errstr, $errfile, $errline)
 {
     $errno = $errno & error_reporting();
@@ -529,13 +587,18 @@ function customError($errno, $errstr, $errfile, $errline)
 }
 set_error_handler("customError");
 
+/**
+ * 自动加载class
+ */
 function __autoload($classname)
 {
     $filename = CFG_AUTOLOAD_DIR . '/' . str_replace('\\', '/', strtolower($classname)) . ".php";
     include_once $filename;
 }
 
-//控制器基类
+/**
+ * 控制器基类
+ */
 abstract class Controller
 {
     public $data = [];
@@ -649,7 +712,9 @@ abstract class Controller
     }
 }
 
-//控制器衍生类，默认以json格式输出数据
+/**
+ * 控制器衍生类，默认以json格式输出数据
+ */
 abstract class Api extends Controller
 {
     protected function output($_view_file = null)
@@ -658,7 +723,9 @@ abstract class Api extends Controller
     }
 }
 
-//控制器衍生类，默认以模板文件渲染数据
+/**
+ * 控制器衍生类，默认以模板文件渲染数据
+ */
 abstract class Page extends Controller
 {
     protected function output($_view_file = null)
@@ -667,8 +734,8 @@ abstract class Page extends Controller
     }
 }
 
-//分页器
 /**
+ * 分页器
  * @author Jason Grimes
  * @source https://github.com/jasongrimes/php-paginator
  */
@@ -970,7 +1037,9 @@ class Pager
     }
 }
 
-//数据库操作类
+/**
+ * 数据库操作类
+ */
 class DB
 {
     private $config;
@@ -1063,7 +1132,9 @@ class DB
         return $this->dbh->commit();
     }
 
-    //查询单行数据
+    /**
+     * 查询单行数据
+     */
     public function find($sql, $parameters = [])
     {
         $this->connect();
@@ -1078,7 +1149,9 @@ class DB
         return $ret;
     }
 
-    //查询多行数据，不分页
+    /**
+     * 查询多行数据，不分页
+     */
     public function findAll($sql, $parameters = [])
     {
         $this->connect();
@@ -1091,8 +1164,10 @@ class DB
         return $result;
     }
 
-    //按分页查询多行数据，并自动生成分页器对象
-    public function findAndPage($sql, $parameters = [], $pageSize = 0)
+    /**
+     * 按分页查询多行数据，并自动生成分页器对象，默认读取get传来的page参数
+     */
+    public function findAndPage($sql, $parameters = [], $pageSize = 10)
     {
         global $self;
 
@@ -1112,7 +1187,9 @@ class DB
         return $result;
     }
 
-    //按分页查询多行数据，并计算总数据条数
+    /**
+     * 按分页查询多行数据，并返回总数据条数，总页数等信息
+     */
     public function findAndCountAll($sql, $parameters = [], $page = 0, $pageSize = 0)
     {
         if (is_integer($parameters)) {
@@ -1173,7 +1250,9 @@ class DB
         ];
     }
 
-    //判断数据是否存在
+    /**
+     * 判断数据是否存在
+     */
     public function exists($sql, $parameters = [])
     {
         $this->lastSQL = $sql;
@@ -1181,7 +1260,9 @@ class DB
         return !empty($data);
     }
 
-    //执行SQL查询，返回影响的行数
+    /**
+     * 执行SQL查询，返回影响的行数
+     */
     public function query($sql, $parameters = [])
     {
         $this->connect();
@@ -1196,7 +1277,9 @@ class DB
         return $rowCount;
     }
 
-    //执行SQL查询，返回原始数据
+    /**
+     * 执行SQL查询，返回原始数据
+     */
     public function fetch($sql, $parameters = [], $type = \PDO::FETCH_ASSOC)
     {
         $this->connect();
@@ -1206,7 +1289,9 @@ class DB
         return $this->sth->fetch($type);
     }
 
-    //查询单行数据的单个字段，之间返回该字段值
+    /**
+     * 查询单行数据的单个字段，之间返回该字段值
+     */
     public function findField($sql, $parameters = [], $position = 0)
     {
         $this->connect();
@@ -1369,12 +1454,14 @@ class DB
 
 /******************程序主入口**************************/
 
+//判断临时目录是否可写
 if (!is_writable(CFG_RUNTIME_DIR)) {
     if (!mkdir(CFG_RUNTIME_DIR, 644, true)) {
         exit('runtime目录不可写');
     }
 }
 
+//解析路由
 parseUri(!empty($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), true);
 
 if (!file_exists(CFG_APP_DIR . '/' . MODULE)) {
