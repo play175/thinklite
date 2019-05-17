@@ -89,7 +89,7 @@ function I($name, $default = null, $maxLength = 0)
  */
 function II($name, $default = null, $maxLength = 0)
 {
-    preg_match("/(?:(get|post|request|cookie)\.)?([a-zA-Z0-9_-]+)(?:\/(double|float|d|int|string|date|datetime))?(?:\/([0-9\.-]+))?(?:\/(.+))?/i", $name, $matches);
+    preg_match("/(?:(get|post|request|cookie)\.)?([a-zA-Z0-9_-]+)(?:\/(double|float|int|string|date|datetime|d))?(?:\/([0-9\.-]+\+?))?(?:\/(.+))?/i", $name, $matches);
     if (!empty($matches)) {
         $from = strtolower(empty($matches[1]) ? 'request' : $matches[1]);
         $key = isset($matches[2]) ? $matches[2] : null;
